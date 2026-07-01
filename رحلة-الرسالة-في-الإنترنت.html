@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رحلة الرسالة في الإنترنت</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #11161f;
+    --surface2: #1a2130;
+    --border: rgba(255,255,255,0.08);
+    --text: #eceef3;
+    --muted: #8891a3;
+    --purple: #8b7fe8;
+    --purple-light: #b0a6f4;
+    --purple-dim: rgba(139,127,232,0.16);
+    --teal: #17b48a;
+    --teal-light: #4fd6ac;
+    --teal-dim: rgba(23,180,138,0.16);
+    --gold: #e0a83e;
+    --gold-light: #f2c368;
+    --gold-dim: rgba(224,168,62,0.16);
+    --coral: #e2594a;
+    --coral-dim: rgba(226,89,74,0.18);
+    --mono: 'Courier New', monospace;
+    --heading: 'Cairo', 'Tajawal', sans-serif;
+    --body: 'Tajawal', 'Cairo', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.75;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* subtle desert-night texture */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(139,127,232,0.08), transparent),
+      radial-gradient(ellipse 60% 40% at 90% 110%, rgba(224,168,62,0.06), transparent);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── header ── */
+  header {
+    padding: 1.8rem 2rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-dot {
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 14px var(--gold);
+    animation: pulse-dot 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+  .logo h1 { font-family: var(--heading); font-size: 20px; font-weight: 800; letter-spacing: -0.2px; }
+  .logo span { color: var(--muted); font-weight: 500; font-size: 14px; display: block; margin-top: 2px; }
+  .step-counter {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 5px 14px;
+    border-radius: 20px;
+    direction: ltr;
+  }
+  .step-counter b { color: var(--gold-light); }
+
+  main { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 0; }
+
+  /* ── message input ── */
+  .message-row {
+    margin: 1.4rem 2rem 1rem;
+    display: flex; gap: 10px; align-items: center;
+    flex-wrap: wrap;
+  }
+  .message-row label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .message-row input {
+    flex: 1;
+    min-width: 180px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: var(--body);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .message-row input:focus { border-color: var(--purple); }
+  .icon-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+    font-family: var(--body);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.1s;
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .icon-btn:hover { background: var(--surface2); border-color: rgba(255,255,255,0.18); }
+  .icon-btn:active { transform: scale(0.96); }
+  .icon-btn.on { border-color: var(--teal); color: var(--teal-light); }
+
+  /* ── packet badges ── */
+  .packet-status { margin: 0 2rem 1rem; display: flex; gap: 8px; flex-wrap: wrap; }
+  .pkt-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-family: var(--mono);
+    transition: all 0.3s;
+    opacity: 0.4;
+  }
+  .pkt-badge.active { opacity: 1; }
+  .pkt-badge.delivered { border-color: var(--teal); color: var(--teal-light); opacity: 1; }
+  .pkt-badge.traveling { border-color: var(--purple); color: var(--purple-light); opacity: 1; animation: pkt-travel 0.8s ease-in-out infinite alternate; }
+  @keyframes pkt-travel { from{opacity:0.7} to{opacity:1} }
+  .pkt-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* ── scene ── */
+  .scene-wrap { padding: 0 2rem 1.2rem; }
+  #scene {
+    width: 100%;
+    height: 440px;
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .stars { position: absolute; inset: 0; pointer-events: none; }
+  .star {
+    position: absolute; width: 1.5px; height: 1.5px;
+    background: rgba(255,255,255,0.4); border-radius: 50%;
+    animation: twinkle var(--d,3s) ease-in-out infinite;
+  }
+  @keyframes twinkle { 0%,100%{opacity:0.2} 50%{opacity:0.8} }
+  #net-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  .node {
+    position: absolute;
+    transform: translate(50%, -50%);
+    display: flex; flex-direction: column; align-items: center;
+    gap: 5px;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .node-circle {
+    width: 54px; height: 54px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 23px;
+    border: 2px solid rgba(255,255,255,0.1);
+    transition: border-color 0.4s, box-shadow 0.4s, background 0.4s;
+    position: relative;
+  }
+  .node-label {
+    font-size: 11.5px; font-weight: 700; color: var(--muted);
+    transition: color 0.4s; white-space: nowrap; text-align: center;
+  }
+  .node-sublabel {
+    font-size: 10px; color: rgba(136,145,163,0.75);
+    font-family: var(--mono); white-space: nowrap; direction: ltr;
+  }
+
+  .node.sender .node-circle  { background: var(--purple-dim); }
+  .node.receiver .node-circle { background: var(--teal-dim); }
+  .node.router .node-circle   { background: rgba(255,255,255,0.04); }
+
+  .node.active .node-circle {
+    border-color: var(--purple);
+    box-shadow: 0 0 20px var(--purple-dim), 0 0 40px rgba(139,127,232,0.08);
+  }
+  .node.active .node-label { color: var(--purple-light); }
+  .node.router.active .node-circle { border-color: var(--gold); box-shadow: 0 0 20px var(--gold-dim); }
+  .node.router.active .node-label { color: var(--gold); }
+  .node.receiver.active .node-circle { border-color: var(--teal); box-shadow: 0 0 20px var(--teal-dim); }
+  .node.receiver.active .node-label { color: var(--teal-light); }
+
+  .node.broken .node-circle { border-color: var(--coral) !important; box-shadow: 0 0 22px var(--coral-dim) !important; background: var(--coral-dim) !important; }
+  .node.broken .node-label { color: var(--coral) !important; }
+  .node.broken .node-circle::after {
+    content: '⚡'; position: absolute; top: -6px; left: -6px;
+    font-size: 15px; filter: drop-shadow(0 0 4px var(--coral));
+  }
+
+  .node.breakable { pointer-events: auto; }
+  .node.breakable .node-circle {
+    cursor: pointer;
+    animation: pulse-break 1.15s ease-in-out infinite;
+  }
+  @keyframes pulse-break {
+    0%,100% { box-shadow: 0 0 0 0 rgba(226,89,74,0.35); }
+    50% { box-shadow: 0 0 0 10px rgba(226,89,74,0); }
+  }
+
+  .packet {
+    position: absolute;
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 10px; font-weight: 700;
+    border: 1.5px solid;
+    transform: translate(50%, -50%);
+    z-index: 5; pointer-events: none;
+    opacity: 0;
+  }
+  .packet.p1 { background: rgba(139,127,232,0.2); border-color: var(--purple); color: var(--purple-light); }
+  .packet.p2 { background: rgba(23,180,138,0.2);  border-color: var(--teal);   color: var(--teal-light); }
+  .packet.p3 { background: rgba(224,168,62,0.2);  border-color: var(--gold);  color: var(--gold-light); }
+  .packet.p4 { background: rgba(226,89,74,0.2);  border-color: var(--coral);  color: #f4a99f; }
+
+  #tooltip {
+    position: absolute;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    line-height: 1.7;
+    pointer-events: none;
+    z-index: 20;
+    max-width: 210px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  #tooltip.show { opacity: 1; }
+  #tooltip strong { color: var(--gold-light); display: block; margin-bottom: 3px; font-family: var(--heading); }
+
+  .layer-badge {
+    position: absolute; top: 14px; right: 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 11.5px;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .layer-badge.show { opacity: 1; }
+  .layer-badge span { color: var(--gold-light); font-weight: 700; }
+
+  .hint-badge {
+    position: absolute; bottom: 14px; left: 14px; right: 14px;
+    background: var(--surface2);
+    border: 1px solid rgba(226,89,74,0.35);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    color: var(--text);
+    z-index: 10;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .hint-badge.show { opacity: 1; }
+
+  /* ── controls panel ── */
+  .controls {
+    padding: 0 2rem 1rem;
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+  }
+  .btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13.5px;
+    font-family: var(--body);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.1s;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .btn:hover { background: var(--surface2); border-color: rgba(255,255,255,0.15); }
+  .btn:active { transform: scale(0.97); }
+  .btn.primary { background: var(--purple); border-color: var(--purple); color: #fff; }
+  .btn.primary:hover { background: var(--purple-light); border-color: var(--purple-light); }
+  .btn.primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .spacer { flex: 1; }
+  .speed-wrap { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+  .speed-wrap select {
+    background: var(--surface); color: var(--text); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 10px; font-family: var(--body); font-size: 12.5px; cursor: pointer;
+  }
+
+  /* ── info panel ── */
+  .info-strip { margin: 0 2rem 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .info-header { padding: 13px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .info-phase { font-size: 10.5px; font-weight: 700; color: var(--muted); }
+  .info-title { font-family: var(--heading); font-size: 17px; font-weight: 700; color: var(--text); }
+  .info-phase-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--purple); box-shadow: 0 0 8px var(--purple); flex-shrink: 0; }
+  .info-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  @media (max-width: 600px) { .info-body { grid-template-columns: 1fr; } }
+  .info-col { padding: 14px 18px; }
+  .info-col + .info-col { border-right: 1px solid var(--border); }
+  @media (max-width: 600px) { .info-col + .info-col { border-right: none; border-top: 1px solid var(--border); } }
+  .info-col-label { font-size: 10.5px; font-weight: 700; color: var(--muted); margin-bottom: 5px; }
+  .info-col-text { font-size: 13.5px; color: var(--text); line-height: 1.75; }
+  .info-col-text .hi { color: var(--gold-light); font-weight: 700; font-family: var(--heading); }
+  .info-col-text .code {
+    font-family: var(--mono); font-size: 11px; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px;
+    color: var(--teal-light); display: inline-block; margin-top: 4px; direction: ltr;
+  }
+
+  /* ── layer legend (explore mode) ── */
+  .legend-heading { margin: 0 2rem 0.6rem; font-size: 12px; color: var(--muted); }
+  .legend {
+    margin: 0 2rem 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px;
+  }
+  .legend-item {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 12px; display: flex; align-items: center; gap: 9px;
+    cursor: pointer; transition: border-color 0.2s, background 0.2s;
+  }
+  .legend-item:hover { background: var(--surface2); }
+  .legend-item.active { border-color: rgba(224,168,62,0.55); background: var(--surface2); }
+  .legend-num { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; }
+  .legend-text strong { display: block; font-size: 12.5px; font-weight: 700; font-family: var(--heading); }
+  .legend-text span { font-size: 11px; color: var(--muted); }
+  .l4 .legend-num { background: var(--purple-dim); color: var(--purple-light); }
+  .l3 .legend-num { background: var(--teal-dim);   color: var(--teal-light); }
+  .l2 .legend-num { background: var(--gold-dim);  color: var(--gold-light); }
+  .l1 .legend-num { background: rgba(255,255,255,0.04); color: var(--muted); }
+
+  .explore-panel {
+    margin: -0.8rem 2rem 2rem;
+    background: var(--surface2);
+    border: 1px solid var(--gold-dim);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 13.5px;
+    line-height: 1.8;
+    display: none;
+  }
+  .explore-panel.show { display: block; }
+  .explore-panel .close-explore {
+    float: left; background: none; border: none; color: var(--muted);
+    font-size: 13px; cursor: pointer; font-family: var(--body);
+  }
+  .explore-panel strong { color: var(--gold-light); font-family: var(--heading); }
+
+  /* ── quiz ── */
+  .quiz-panel {
+    margin: 0 2rem 2.5rem;
+    background: var(--surface);
+    border: 1px solid var(--purple-dim);
+    border-radius: 14px;
+    padding: 20px 22px;
+    display: none;
+  }
+  .quiz-panel.show { display: block; }
+  .quiz-title { font-family: var(--heading); font-size: 18px; font-weight: 800; margin-bottom: 4px; color: var(--gold-light); }
+  .quiz-sub { font-size: 12.5px; color: var(--muted); margin-bottom: 16px; }
+  .quiz-q { margin-bottom: 18px; }
+  .quiz-q-text { font-size: 14.5px; font-weight: 700; margin-bottom: 10px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt {
+    text-align: right;
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    padding: 10px 14px; border-radius: 9px; font-family: var(--body); font-size: 13.5px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .quiz-opt:hover:not(:disabled) { border-color: var(--purple); }
+  .quiz-opt:disabled { cursor: default; }
+  .quiz-opt.correct { border-color: var(--teal); background: var(--teal-dim); color: var(--teal-light); }
+  .quiz-opt.wrong { border-color: var(--coral); background: var(--coral-dim); color: #f4a99f; }
+  .quiz-feedback { font-size: 12.5px; margin-top: 8px; min-height: 16px; }
+  .quiz-feedback.correct { color: var(--teal-light); }
+  .quiz-feedback.wrong { color: #f4a99f; }
+  .quiz-score { font-size: 13px; color: var(--gold-light); font-weight: 700; margin-top: 6px; }
+
+  footer {
+    padding: 1.5rem 2rem 2rem;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
+    position: relative; z-index: 1;
+  }
+  footer span { font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    <div>
+      <h1>رحلة الرسالة في الإنترنت</h1>
+      <span>إزاي رسالتك بتوصل لصاحبك في أجزاء من الثانية؟</span>
+    </div>
+  </div>
+  <div class="step-counter">الخطوة <b id="step-num">0</b> / <b id="step-total">7</b></div>
+</header>
+
+<main>
+
+  <div class="message-row">
+    <label>اكتب رسالتك:</label>
+    <input type="text" id="msg-input" value="أهلاً يا صاحبي!" maxlength="30" placeholder="اكتب رسالة قصيرة…">
+    <button class="icon-btn" id="sound-btn" onclick="toggleSound()">🔊 الصوت</button>
+    <button class="icon-btn" onclick="resetAll()">↺ من الأول</button>
+  </div>
+
+  <div class="packet-status">
+    <div class="pkt-badge" id="pb1"><div class="pkt-dot"></div>Packet 1</div>
+    <div class="pkt-badge" id="pb2"><div class="pkt-dot"></div>Packet 2</div>
+    <div class="pkt-badge" id="pb3"><div class="pkt-dot"></div>Packet 3</div>
+    <div style="flex:1"></div>
+    <div class="pkt-badge" id="pb-reassembled" style="background:var(--teal-dim);display:none">✓ اترتبوا واتجمعوا!</div>
+  </div>
+
+  <div class="scene-wrap">
+    <div id="scene">
+      <div class="stars" id="stars"></div>
+      <canvas id="net-canvas"></canvas>
+      <div class="layer-badge" id="layer-badge">Layer: <span id="layer-name">—</span></div>
+      <div class="hint-badge" id="hint-badge"></div>
+      <div id="tooltip"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn primary" id="next-btn" onclick="nextStep()">
+      <span id="btn-icon">▶</span> <span id="btn-label">يلا نبدأ الرحلة</span>
+    </button>
+    <button class="btn" onclick="prevStep()">رجوع ↩</button>
+    <div class="spacer"></div>
+    <div class="speed-wrap">
+      <span>السرعة:</span>
+      <select id="speed-select">
+        <option value="3200">بطيء</option>
+        <option value="2200" selected>عادي</option>
+        <option value="1300">سريع</option>
+      </select>
+    </div>
+    <button class="btn" onclick="toggleAuto()" id="auto-btn">⏩ تشغيل تلقائي</button>
+  </div>
+
+  <div class="info-strip">
+    <div class="info-header">
+      <div class="info-phase-dot" id="phase-dot"></div>
+      <div>
+        <div class="info-phase" id="phase-label">جاهزين</div>
+        <div class="info-title" id="phase-title">دوس "يلا نبدأ الرحلة" عشان نبدأ</div>
+      </div>
+    </div>
+    <div class="info-body">
+      <div class="info-col">
+        <div class="info-col-label">اللي بيحصل دلوقتي</div>
+        <div class="info-col-text" id="what-text">رسالتك مستنية تتبعت. هتتقسم لـ Packets، وتاخد IP address، وتسافر جوه الإنترنت، وتترتب تاني عند صاحبك.</div>
+      </div>
+      <div class="info-col">
+        <div class="info-col-label">أنهي Layer شغالة</div>
+        <div class="info-col-text" id="layer-text">الأربع Layers هتشتغل مع بعض خلال الرحلة دي.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend-heading">💡 دوس على أي Layer تحت عشان تعرف عنها أكتر (مش لازم تنتظر دورها في الرحلة):</div>
+  <div class="legend">
+    <div class="legend-item l4" onclick="exploreLayer(4,this)">
+      <div class="legend-num">4</div>
+      <div class="legend-text"><strong>Application</strong><span>اللي انت بتشوفه</span></div>
+    </div>
+    <div class="legend-item l3" onclick="exploreLayer(3,this)">
+      <div class="legend-num">3</div>
+      <div class="legend-text"><strong>Transport</strong><span>تقسيم الـ Packets</span></div>
+    </div>
+    <div class="legend-item l2" onclick="exploreLayer(2,this)">
+      <div class="legend-num">2</div>
+      <div class="legend-text"><strong>Network</strong><span>العنونة والتوجيه</span></div>
+    </div>
+    <div class="legend-item l1" onclick="exploreLayer(1,this)">
+      <div class="legend-num">1</div>
+      <div class="legend-text"><strong>Link</strong><span>الإشارة الفيزيائية</span></div>
+    </div>
+  </div>
+  <div class="explore-panel" id="explore-panel">
+    <button class="close-explore" onclick="closeExplore()">✕ قفل</button>
+    <div id="explore-text"></div>
+  </div>
+
+  <div class="quiz-panel" id="quiz-panel">
+    <div class="quiz-title">🧠 اختبر نفسك!</div>
+    <div class="quiz-sub">جاوب على السؤالين دول وشوف فهمت الرحلة صح ولا لأ</div>
+
+    <div class="quiz-q">
+      <div class="quiz-q-text">1. الـ Layer اللي بتقسم الرسالة لـ Packets اسمها ايه؟</div>
+      <div class="quiz-options" id="q1-options"></div>
+      <div class="quiz-feedback" id="q1-feedback"></div>
+    </div>
+
+    <div class="quiz-q">
+      <div class="quiz-q-text">2. لو Router اتعطل فجأة وهو ناقل الرسالة، هيحصل ايه؟</div>
+      <div class="quiz-options" id="q2-options"></div>
+      <div class="quiz-feedback" id="q2-feedback"></div>
+    </div>
+
+    <div class="quiz-score" id="quiz-score"></div>
+  </div>
+
+</main>
+
+<footer>
+  <span>اتعملت لجلسة تعليم الشباب في جامعة MSA · للسن من 8 إلى 11</span>
+  <span>دوس "يلا نبدأ الرحلة" ← تابع كل خطوة ← وشوف رسالتك بتوصل!</span>
+</footer>
+
+<script>
+const scene = document.getElementById('scene');
+const canvas = document.getElementById('net-canvas');
+const ctx = canvas.getContext('2d');
+
+let W, H;
+function resize() {
+  W = canvas.width  = scene.clientWidth;
+  H = canvas.height = scene.clientHeight;
+  drawEdges();
+}
+window.addEventListener('resize', resize);
+
+// ── stars ───────────────────────────────────────────────────
+function makeStars() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 60; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.left  = Math.random() * 100 + '%';
+    s.style.top   = Math.random() * 100 + '%';
+    s.style.setProperty('--d', (2 + Math.random() * 4).toFixed(1) + 's');
+    s.style.animationDelay = (Math.random() * 4).toFixed(1) + 's';
+    container.appendChild(s);
+  }
+}
+makeStars();
+
+// ── sound ───────────────────────────────────────────────────
+let audioCtx = null;
+let soundOn = true;
+function ensureAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+function beep(freq = 440, duration = 0.12, type = 'sine', gainVal = 0.05) {
+  if (!soundOn) return;
+  try {
+    ensureAudio();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.value = gainVal;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+    o.stop(audioCtx.currentTime + duration);
+  } catch (e) {}
+}
+function successChime() { beep(523,0.12); setTimeout(()=>beep(659,0.12),110); setTimeout(()=>beep(784,0.18),220); }
+function toggleSound() {
+  soundOn = !soundOn;
+  const btn = document.getElementById('sound-btn');
+  btn.textContent = soundOn ? '🔊 الصوت' : '🔇 مقفول';
+  btn.classList.toggle('on', soundOn);
+  if (soundOn) beep(500,0.08);
+}
+
+// ── network topology ─────────────────────────────────────────────
+const NODE_DEFS = [
+  { id:'sender',  label:'جهازك',        sub:'192.168.1.10', emoji:'💻', type:'sender',   px:0.10, py:0.50 },
+  { id:'r1',      label:'Router 1',     sub:'10.0.0.1',     emoji:'📡', type:'router',   px:0.28, py:0.28 },
+  { id:'r2',      label:'Router 2',     sub:'10.0.1.2',     emoji:'📡', type:'router',   px:0.28, py:0.72 },
+  { id:'r3',      label:'Router 3',     sub:'10.0.2.3',     emoji:'📡', type:'router',   px:0.50, py:0.50 },
+  { id:'r4',      label:'Router 4',     sub:'10.0.3.4',     emoji:'📡', type:'router',   px:0.72, py:0.28 },
+  { id:'r5',      label:'Router 5',     sub:'10.0.4.5',     emoji:'📡', type:'router',   px:0.72, py:0.72 },
+  { id:'receiver',label:'جهاز صاحبك',   sub:'172.16.0.42',  emoji:'📱', type:'receiver', px:0.90, py:0.50 },
+];
+
+const EDGES = [
+  ['sender','r1'], ['sender','r2'],
+  ['r1','r3'], ['r2','r3'],
+  ['r3','r4'], ['r3','r5'],
+  ['r4','receiver'], ['r5','receiver'],
+  ['r1','r4'],
+];
+
+const ROUTES = [
+  ['sender','r1','r3','r4','receiver'],
+  ['sender','r2','r3','r5','receiver'],
+  ['sender','r1','r4','receiver'],
+];
+
+let nodeEls = {};
+
+const TOOLTIP_TYPE_TEXT = {
+  router:   'Router — بيقرا الـ IP address ويمرره لأقرب محطة',
+  sender:   'المرسل — من هنا الرسالة بتبدأ رحلتها',
+  receiver: 'المستقبل — هنا وجهة الرسالة النهائية',
+};
+
+function buildNodes() {
+  NODE_DEFS.forEach(n => {
+    const el = document.createElement('div');
+    el.className = `node ${n.type}`;
+    el.id = 'node-' + n.id;
+    el.dataset.id = n.id;
+    el.innerHTML = `
+      <div class="node-circle">${n.emoji}</div>
+      <div class="node-label">${n.label}</div>
+      <div class="node-sublabel">${n.sub}</div>
+    `;
+    el.addEventListener('mouseenter', (e) => showTooltip(e, n));
+    el.addEventListener('mouseleave', hideTooltip);
+    el.addEventListener('click', () => onNodeClick(n));
+    scene.appendChild(el);
+    nodeEls[n.id] = el;
+  });
+  positionNodes();
+}
+
+function positionNodes() {
+  NODE_DEFS.forEach(n => {
+    const el = nodeEls[n.id];
+    el.style.right = (n.px * 100) + '%';
+    el.style.top  = (n.py * 100) + '%';
+  });
+}
+
+function nodeXY(id) {
+  const n = NODE_DEFS.find(x => x.id === id);
+  return { x: (1 - n.px) * W, y: n.py * H };
+}
+
+// ── canvas edges ───────────────────────────────────────────
+let activeEdges = new Set();
+let brokenNodeId = null;
+
+function drawEdges() {
+  if (!W) return;
+  ctx.clearRect(0, 0, W, H);
+  EDGES.forEach(([a, b]) => {
+    const p1 = nodeXY(a), p2 = nodeXY(b);
+    const key = [a,b].sort().join('-');
+    const isActive = activeEdges.has(key);
+    const isBroken = brokenNodeId && (a === brokenNodeId || b === brokenNodeId);
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    if (isBroken) {
+      ctx.strokeStyle = 'rgba(226,89,74,0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([2,5]);
+    } else {
+      ctx.strokeStyle = isActive ? 'rgba(139,127,232,0.55)' : 'rgba(255,255,255,0.06)';
+      ctx.lineWidth   = isActive ? 2 : 1;
+      ctx.setLineDash(isActive ? [] : [4, 6]);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+  });
+}
+function activateEdge(a, b) { activeEdges.add([a,b].sort().join('-')); drawEdges(); }
+function clearEdges() { activeEdges.clear(); drawEdges(); }
+
+// ── packet animation ──────────────────────────────────────────────
+function makePacket(cls, label) {
+  const el = document.createElement('div');
+  el.className = `packet ${cls}`;
+  el.textContent = label;
+  scene.appendChild(el);
+  return el;
+}
+function setPacketPos(el, x, y) { el.style.right = (W - x) + 'px'; el.style.top = y + 'px'; }
+function animatePacket(el, fromId, toId, duration) {
+  return new Promise(resolve => {
+    const from = nodeXY(fromId), to = nodeXY(toId);
+    el.style.opacity = '1';
+    const start = performance.now();
+    function frame(now) {
+      const t = Math.min((now - start) / duration, 1);
+      const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+      setPacketPos(el, from.x + (to.x - from.x) * ease, from.y + (to.y - from.y) * ease);
+      if (t < 1) requestAnimationFrame(frame); else resolve();
+    }
+    requestAnimationFrame(frame);
+  });
+}
+function hidePacket(el) { el.style.opacity = '0'; }
+
+// ── tooltip ───────────────────────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+function showTooltip(e, n) {
+  tooltip.innerHTML = `<strong>${n.label}</strong>IP: ${n.sub}<br>${TOOLTIP_TYPE_TEXT[n.type]}`;
+  tooltip.classList.add('show');
+  positionTooltip(e);
+}
+function positionTooltip(e) {
+  const rect = scene.getBoundingClientRect();
+  let x = e.clientX - rect.left - 12;
+  let y = e.clientY - rect.top + 12;
+  if (x - 210 < 0) x = x + 230;
+  tooltip.style.right = (rect.width - x) + 'px';
+  tooltip.style.top  = y + 'px';
+}
+function hideTooltip() { tooltip.classList.remove('show'); }
+scene.addEventListener('mousemove', (e) => { if (tooltip.classList.contains('show')) positionTooltip(e); });
+
+// ── break-a-router interactivity ────────────────────────────────
+function buildAdjacency(excludeId) {
+  const adj = {};
+  NODE_DEFS.forEach(n => adj[n.id] = []);
+  EDGES.forEach(([a,b]) => {
+    if (a === excludeId || b === excludeId) return;
+    adj[a].push(b); adj[b].push(a);
+  });
+  return adj;
+}
+function bfsPath(start, end, excludeId) {
+  const adj = buildAdjacency(excludeId);
+  const visited = new Set([start]);
+  const queue = [[start]];
+  while (queue.length) {
+    const path = queue.shift();
+    const node = path[path.length - 1];
+    if (node === end) return path;
+    for (const nb of adj[node]) {
+      if (!visited.has(nb)) { visited.add(nb); queue.push([...path, nb]); }
+    }
+  }
+  return null;
+}
+
+let breakModeActive = false;
+
+function enterBreakMode() {
+  breakModeActive = true;
+  NODE_DEFS.forEach(n => {
+    if (n.type === 'router') nodeEls[n.id].classList.add('breakable');
+  });
+  showHint('👆 دوس على أي Router (📡) عشان "تعطّله" وشوف الرسالة بتلاقي طريق تانية إزاي');
+}
+function exitBreakMode() {
+  breakModeActive = false;
+  NODE_DEFS.forEach(n => nodeEls[n.id].classList.remove('breakable'));
+  hideHint();
+}
+function onNodeClick(n) {
+  if (breakModeActive && n.type === 'router') handleRouterBreak(n.id);
+}
+async function handleRouterBreak(nodeId) {
+  exitBreakMode();
+  brokenNodeId = nodeId;
+  nodeEls[nodeId].classList.add('broken');
+  beep(180, 0.25, 'sawtooth', 0.06);
+  drawEdges();
+  hideHint();
+  document.getElementById('phase-title').textContent = `📡 Router ${nodeId.replace('r','')} وقع! الشبكة بتدور على طريق بديل…`;
+
+  await delay(400);
+  const path = bfsPath('sender', 'receiver', nodeId);
+  if (!path) {
+    document.getElementById('what-text').innerHTML = 'للأسف في الرسم ده مفيش طريق بديل متاح! لكن في الحقيقة الإنترنت بيتصمم بحيث الاحتمال ده يكون شبه مستحيل.';
+    return;
+  }
+  const rerouteEl = makePacket('p4', '🔁');
+  const s0 = nodeXY(path[0]);
+  setPacketPos(rerouteEl, s0.x, s0.y);
+  rerouteEl.style.opacity = '0.9';
+  for (let i = 0; i < path.length - 1; i++) {
+    activateEdge(path[i], path[i+1]);
+    beep(340 + i*40, 0.08, 'square', 0.03);
+    await animatePacket(rerouteEl, path[i], path[i+1], 480);
+    await delay(60);
+  }
+  hidePacket(rerouteEl);
+  successChime();
+  flashNode('receiver', '#17b48a');
+  setTimeout(() => rerouteEl.remove(), 500);
+
+  document.getElementById('phase-title').textContent = 'الرسالة لاقت طريقها! 🎉';
+  document.getElementById('what-text').innerHTML =
+    `شفت كده؟ 🔌 لما Router ${nodeId.replace('r','')} اتعطل، باقي الـ Routers دورت على طريق بديل عشان الرسالة توصل برضه. ده اسمه <span class="hi">Network Resilience</span>، وهو سبب إن الإنترنت نادرًا ما "بيقع" بالكامل — دايمًا في أكتر من طريق!`;
+}
+
+function showHint(text) {
+  const hb = document.getElementById('hint-badge');
+  hb.textContent = text;
+  hb.classList.add('show');
+}
+function hideHint() { document.getElementById('hint-badge').classList.remove('show'); }
+
+// ── layer explore mode ────────────────────────────────────────────
+const LAYER_DETAILS = {
+  4: '<strong>Layer 4 — Application:</strong> ده محتوى الرسالة نفسه — الكلام، الصور، الفيديوهات. أي برنامج بتستخدمه زي واتساب أو يوتيوب أو الألعاب بيشتغل في الـ Layer دي. هي أقرب Layer ليك كمستخدم.',
+  3: '<strong>Layer 3 — Transport:</strong> زي موظف بريد شاطر بيقسم شحنة كبيرة لـ Packets أصغر ومرقّمة، وبيتابعهم لحد ما يوصلوا. لو Packet اتأخر أو ضاع، بيطلبه تاني تلقائيًا من غير ما تحس!',
+  2: '<strong>Layer 2 — Network:</strong> زي عنوان بيتك المكتوب على الظرف. كل جهاز متصل بالإنترنت — كمبيوتر، موبايل، حتى الأجهزة الذكية في البيت — ليه IP address مميز يوضح مكانه.',
+  1: '<strong>Layer 1 — Link:</strong> دي القطعة الفيزيائية الحقيقية — كابلات نحاس، ألياف ضوئية تحت البحر، وموجات واي فاي في الهوا. من غيرها، ولا Packet واحد هيتحرك سنتيمتر!',
+};
+let exploreOpenFor = null;
+function exploreLayer(num, el) {
+  document.querySelectorAll('.legend-item').forEach(i => i.classList.remove('active'));
+  const panel = document.getElementById('explore-panel');
+  if (exploreOpenFor === num) { closeExplore(); return; }
+  el.classList.add('active');
+  document.getElementById('explore-text').innerHTML = LAYER_DETAILS[num];
+  panel.classList.add('show');
+  exploreOpenFor = num;
+  beep(600,0.06,'sine',0.03);
+}
+function closeExplore() {
+  document.getElementById('explore-panel').classList.remove('show');
+  document.querySelectorAll('.legend-item').forEach(i => i.classList.remove('active'));
+  exploreOpenFor = null;
+}
+
+// ── step machine ──────────────────────────────────────────────────
+let currentStep = 0;
+let animating   = false;
+let autoTimer   = null;
+
+const STEPS = [
+  {
+    phase: 'الخطوة 1 — Application Layer',
+    title: 'رسالتك جاهزة للإرسال',
+    what: 'كتبت رسالة ودوست إرسال. الـ Application Layer بتقول "عايز أوصّل الرسالة دي!" هي لسه مش عارفة حاجة عن الـ Routers ولا الأسلاك؛ هي بس عارفة انت عايز تبعت ايه.',
+    layer: '<span class="hi">Layer 4 — Application</span><br>ده اللي انت بتشوفه وبتستخدمه فعليًا. زي البوستر اللي عايز توصله — المحتوى نفسه.',
+    layerName: '4 — Application', dot: '#8b7fe8',
+    activateNodes: ['sender'], pktStatus: [], showEdges: [],
+  },
+  {
+    phase: 'الخطوة 2 — Transport Layer',
+    title: 'الرسالة اتقسمت لـ 3 Packets',
+    what: 'الـ Transport Layer بتقطع رسالتك لـ 3 Packets مرقّمة عشان تسافر كل واحدة لوحدها. كل Packet عارفة رقمها عشان تترتب صح تاني في الآخر.',
+    layer: '<span class="hi">Layer 3 — Transport</span><br>بتقسم البيانات لـ Packets. بتتابع مين وصل. ولو Packet ضاعت — بتطلبها تاني!<br><span class="code">PKT-1 | PKT-2 | PKT-3</span>',
+    layerName: '3 — Transport', dot: '#17b48a',
+    activateNodes: ['sender'], pktStatus: [1,2,3], showEdges: [], spawnPackets: true,
+  },
+  {
+    phase: 'الخطوة 3 — Network Layer',
+    title: 'كل Packet بتاخد IP address',
+    what: 'الـ Network Layer بتحط الـ IP address بتاع الوجهة على كل Packet — زي ما تكتب عنوان بيت صاحبك على الظرف. أي Router يقدر يقرا الـ address ده ويعرف يبعتها فين بالظبط.',
+    layer: '<span class="hi">Layer 2 — Network</span><br>كل جهاز ليه IP address مميز. الـ Routers بتقراه وبتوجّه الـ Packets ناحية الوجهة.<br><span class="code">→ 172.16.0.42</span>',
+    layerName: '2 — Network', dot: '#e0a83e',
+    activateNodes: ['sender'], pktStatus: [1,2,3], showEdges: [],
+  },
+  {
+    phase: 'الخطوة 4 — Link Layer',
+    title: 'الـ Packets بتسافر جوه الشبكة',
+    what: 'الـ Packets بتخرج من جهازك كإشارات واي فاي. الـ Link Layer هي العالم الفيزيائي — موجات راديو، أسلاك، ضوء الألياف الضوئية. كل Packet بتقفز من Router لـ Router، وكل واحد بيقرا الـ address ويمررها.',
+    layer: '<span class="hi">Layer 1 — Link</span><br>الحاجة الفيزيائية الحقيقية. إشارات واي فاي، أسلاك، نبضات ضوء. من غيرها مفيش حاجة هتتحرك خالص.',
+    layerName: '1 — Link', dot: '#8891a3',
+    activateNodes: ['sender','r1','r2','r3','r4','r5'],
+    pktStatus: [1,2,3],
+    showEdges: [['sender','r1'],['sender','r2'],['r1','r3'],['r2','r3'],['r3','r4'],['r3','r5'],['r4','receiver'],['r5','receiver'],['r1','r4']],
+    travelPackets: true,
+  },
+  {
+    phase: 'الخطوة 5 — الإنترنت بيصلّح نفسه',
+    title: 'جرّب بنفسك: اكسر Router!',
+    what: 'الإنترنت مبني بحيث لو حصل عطل في مكان، الرسالة تلاقي طريق تاني. دوس على أي Router 📡 في الرسم عشان "تعطّله" وشوف Packet جديدة بتلاقي طريق بديل إزاي!',
+    layer: '<span class="hi">Network Resilience</span><br>مفيش طريق واحد بس بين جهازين. الـ Routers بتوجّه الحركة على أفضل طريق متاح كل لحظة.',
+    layerName: 'Rerouting', dot: '#e2594a',
+    activateNodes: ['sender','r1','r2','r3','r4','r5','receiver'],
+    pktStatus: [], showEdges: [],
+    breakMode: true,
+  },
+  {
+    phase: 'الخطوة 6 — الـ Packets وصلت!',
+    title: 'الـ 3 Packets كلها وصلت لصاحبك',
+    what: 'كل Packet سافرت في طريقها: Packet 1 من Router 1 ← 3 ← 4، Packet 2 من Router 2 ← 3 ← 5، وPacket 3 خدت طريق مختصر. كلهم وصلوا، وممكن يكونوا وصلوا مش بالترتيب!',
+    layer: '<span class="hi">Layer 3 — Transport (تاني)</span><br>الـ Transport Layer عند المستقبل بتلاحظ إن الـ 3 Packets وصلوا. دلوقتي بترتبهم تاني: 1، 2، 3.',
+    layerName: '3 — Transport', dot: '#17b48a',
+    activateNodes: ['receiver'], pktStatus: ['d','d','d'],
+    showEdges: [['r4','receiver'],['r5','receiver']], arrive: true,
+  },
+  {
+    phase: 'الخطوة 7 — الرسالة وصلت! 🎉',
+    title: 'صاحبك بيقرا الرسالة',
+    what: 'كل الـ Packets اترتبت صح. الـ Application Layer عند صاحبك استلمت الرسالة كاملة وعرضتها على الشاشة زي ما كتبتها بالظبط. الرحلة كلها حصلت في أجزاء من الثانية!',
+    layer: '<span class="hi">Layer 4 — Application (عند الوجهة)</span><br>الرسالة وصلت سليمة. الـ Application Layer بتعرضها. الرحلة خلصت.',
+    layerName: '4 — Application', dot: '#8b7fe8',
+    activateNodes: ['sender','receiver'], pktStatus: ['d','d','d'],
+    showEdges: [['sender','r1'],['sender','r2'],['r1','r3'],['r2','r3'],['r3','r4'],['r3','r5'],['r4','receiver'],['r5','receiver'],['r1','r4']],
+    complete: true,
+  },
+];
+
+document.getElementById('step-total').textContent = STEPS.length;
+
+function setInfo(step) {
+  document.getElementById('step-num').textContent  = currentStep;
+  document.getElementById('phase-label').textContent = step.phase;
+  document.getElementById('phase-title').textContent  = step.title;
+  document.getElementById('what-text').innerHTML      = step.what;
+  document.getElementById('layer-text').innerHTML     = step.layer;
+  document.getElementById('phase-dot').style.background = step.dot;
+  document.getElementById('phase-dot').style.boxShadow  = `0 0 8px ${step.dot}`;
+  const lb = document.getElementById('layer-badge');
+  document.getElementById('layer-name').textContent = step.layerName;
+  lb.classList.add('show');
+  document.getElementById('btn-label').textContent = currentStep >= STEPS.length ? 'الرحلة خلصت!' : 'الخطوة اللي بعدها';
+  document.getElementById('next-btn').disabled = currentStep >= STEPS.length;
+}
+
+function setNodes(ids) {
+  NODE_DEFS.forEach(n => nodeEls[n.id].classList.toggle('active', ids.includes(n.id)));
+}
+function setPktBadges(status) {
+  [1,2,3].forEach(i => {
+    const el = document.getElementById('pb'+i);
+    el.classList.remove('active','traveling','delivered');
+    if (status.includes(i))  el.classList.add('active','traveling');
+    if (status[i-1] === 'd') { el.classList.add('delivered'); el.classList.remove('traveling'); }
+  });
+  document.getElementById('pb-reassembled').style.display = status.every(s => s === 'd') ? 'flex' : 'none';
+}
+
+function clearBreakState() {
+  exitBreakMode();
+  brokenNodeId = null;
+  NODE_DEFS.forEach(n => nodeEls[n.id].classList.remove('broken'));
+  drawEdges();
+}
+
+let p1el, p2el, p3el;
+
+async function nextStep() {
+  if (animating || currentStep >= STEPS.length) return;
+  animating = true;
+  currentStep++;
+  const step = STEPS[currentStep - 1];
+
+  clearBreakState();
+  setNodes(step.activateNodes || []);
+  clearEdges();
+  (step.showEdges || []).forEach(([a,b]) => activateEdge(a,b));
+  setInfo(step);
+  setPktBadges(step.pktStatus || []);
+
+  if (step.spawnPackets) {
+    [p1el,p2el,p3el].forEach(p => { if (p) { hidePacket(p); p.remove(); } });
+    const s = nodeXY('sender');
+    p1el = makePacket('p1','P1'); setPacketPos(p1el, s.x, s.y); p1el.style.opacity='0.9';
+    p2el = makePacket('p2','P2'); setPacketPos(p2el, s.x, s.y); p2el.style.opacity='0.9';
+    p3el = makePacket('p3','P3'); setPacketPos(p3el, s.x, s.y); p3el.style.opacity='0.9';
+    beep(700,0.09); setTimeout(()=>beep(760,0.09),90); setTimeout(()=>beep(820,0.09),180);
+  }
+
+  if (step.travelPackets && p1el && p2el && p3el) {
+    const speed = 550;
+    async function travel(el, route) {
+      for (let i = 0; i < route.length - 1; i++) {
+        activateEdge(route[i], route[i+1]);
+        beep(420 + i*30, 0.06, 'triangle', 0.025);
+        await animatePacket(el, route[i], route[i+1], speed);
+        await delay(80);
+      }
+    }
+    await Promise.all([
+      travel(p1el, ROUTES[0]),
+      (async () => { await delay(200); await travel(p2el, ROUTES[1]); })(),
+      (async () => { await delay(400); await travel(p3el, ROUTES[2]); })(),
+    ]);
+  }
+
+  if (step.breakMode) {
+    await delay(200);
+    enterBreakMode();
+  }
+
+  if (step.arrive) {
+    [p1el,p2el,p3el].forEach(p => { if (p) hidePacket(p); });
+    flashNode('receiver', '#17b48a');
+    successChime();
+  }
+
+  if (step.complete) {
+    flashNode('sender', '#8b7fe8');
+    flashNode('receiver', '#17b48a');
+    showCompleteBurst();
+    [p1el,p2el,p3el].forEach(p => { if (p) p.remove(); });
+    document.getElementById('quiz-panel').classList.add('show');
+  }
+
+  animating = false;
+}
+
+function prevStep() {
+  if (animating || currentStep <= 0) return;
+  currentStep = Math.max(0, currentStep - 1);
+  clearBreakState();
+  document.getElementById('quiz-panel').classList.remove('show');
+  if (currentStep === 0) { resetAll(); return; }
+  const step = STEPS[currentStep - 1];
+  setNodes(step.activateNodes || []);
+  clearEdges();
+  (step.showEdges || []).forEach(([a,b]) => activateEdge(a,b));
+  setInfo(step);
+  setPktBadges(step.pktStatus || []);
+}
+
+function resetAll() {
+  if (autoTimer) { clearInterval(autoTimer); autoTimer = null; document.getElementById('auto-btn').textContent = '⏩ تشغيل تلقائي'; }
+  currentStep = 0;
+  animating = false;
+  clearBreakState();
+  setNodes([]);
+  clearEdges();
+  [p1el,p2el,p3el].forEach(p => { if (p) p.remove(); });
+  p1el = p2el = p3el = null;
+  document.getElementById('step-num').textContent = '0';
+  document.getElementById('phase-label').textContent = 'جاهزين';
+  document.getElementById('phase-title').textContent = 'دوس "يلا نبدأ الرحلة" عشان نبدأ';
+  document.getElementById('what-text').textContent = 'رسالتك مستنية تتبعت. هتتقسم لـ Packets، وتاخد IP address، وتسافر جوه الإنترنت، وتترتب تاني عند صاحبك.';
+  document.getElementById('layer-text').textContent = 'الأربع Layers هتشتغل مع بعض خلال الرحلة دي.';
+  document.getElementById('layer-badge').classList.remove('show');
+  document.getElementById('btn-label').textContent = 'يلا نبدأ الرحلة';
+  document.getElementById('next-btn').disabled = false;
+  setPktBadges([]);
+  document.getElementById('pb-reassembled').style.display = 'none';
+  document.getElementById('quiz-panel').classList.remove('show');
+  resetQuiz();
+  closeExplore();
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function flashNode(id, color) {
+  const el = nodeEls[id];
+  el.querySelector('.node-circle').style.boxShadow = `0 0 30px ${color}, 0 0 60px ${color}40`;
+  setTimeout(() => { el.querySelector('.node-circle').style.boxShadow = ''; }, 1500);
+}
+
+function showCompleteBurst() {
+  const r = nodeXY('receiver');
+  for (let i = 0; i < 8; i++) {
+    const spark = document.createElement('div');
+    spark.style.cssText = `
+      position:absolute; width:6px; height:6px; border-radius:50%;
+      background: ${['#8b7fe8','#17b48a','#e0a83e','#fff'][i%4]};
+      right:${W-r.x}px; top:${r.y}px;
+      pointer-events:none; z-index:10;
+      transform:translate(50%,-50%);
+      transition: all 0.8s ease-out; opacity:1;
+    `;
+    scene.appendChild(spark);
+    requestAnimationFrame(() => {
+      const angle = (i / 8) * Math.PI * 2;
+      const dist  = 50 + Math.random() * 40;
+      spark.style.right = (W - (r.x + Math.cos(angle) * dist)) + 'px';
+      spark.style.top   = (r.y + Math.sin(angle) * dist) + 'px';
+      spark.style.opacity = '0';
+    });
+    setTimeout(() => spark.remove(), 900);
+  }
+}
+
+let autoPlaying = false;
+function toggleAuto() {
+  if (autoPlaying) {
+    clearInterval(autoTimer); autoTimer = null;
+    autoPlaying = false;
+    document.getElementById('auto-btn').textContent = '⏩ تشغيل تلقائي';
+  } else {
+    autoPlaying = true;
+    document.getElementById('auto-btn').textContent = '⏸ وقف';
+    const interval = parseInt(document.getElementById('speed-select').value, 10);
+    autoTimer = setInterval(async () => {
+      if (currentStep >= STEPS.length) {
+        clearInterval(autoTimer); autoTimer = null; autoPlaying = false;
+        document.getElementById('auto-btn').textContent = '⏩ تشغيل تلقائي';
+        return;
+      }
+      if (!animating && !breakModeActive) await nextStep();
+    }, interval);
+  }
+}
+document.getElementById('speed-select').addEventListener('change', () => {
+  if (autoPlaying) { toggleAuto(); toggleAuto(); }
+});
+
+// ── quiz ─────────────────────────────────────────────────────────
+const QUIZ = [
+  { id:'q1', options:['Transport Layer','Application Layer','Link Layer'], correct:0,
+    ok:'🎉 برافو! الـ Transport Layer هي اللي بتقسم الرسالة لـ Packets وبترقّمها.',
+    no:'مش قصادها. فكر في الـ Layer اللي "بتقسم" الرسالة لحتت أصغر. جرب تاني!' },
+  { id:'q2', options:['بتضيع للأبد','بتاخد طريق بديل وتوصل','لازم تتبعت من الأول يدويًا'], correct:1,
+    ok:'🎉 تمام! الشبكة بتلاقي طريق تاني تلقائيًا — زي ما شفت في الخطوة 5.',
+    no:'قربت! فكر في اللي شفته لما كسرت الـ Router في الخطوة 5. جرب تاني!' },
+];
+let quizScore = 0;
+let quizAnswered = {};
+
+function buildQuiz() {
+  QUIZ.forEach((q, qi) => {
+    const container = document.getElementById(q.id + '-options');
+    container.innerHTML = '';
+    q.options.forEach((opt, oi) => {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-opt';
+      btn.textContent = opt;
+      btn.onclick = () => answerQuiz(q, oi, btn, container);
+      container.appendChild(btn);
+    });
+  });
+}
+function answerQuiz(q, chosenIdx, btn, container) {
+  if (quizAnswered[q.id]) return;
+  quizAnswered[q.id] = true;
+  const buttons = container.querySelectorAll('.quiz-opt');
+  buttons.forEach(b => b.disabled = true);
+  const feedback = document.getElementById(q.id + '-feedback');
+  if (chosenIdx === q.correct) {
+    btn.classList.add('correct');
+    feedback.textContent = q.ok;
+    feedback.className = 'quiz-feedback correct';
+    quizScore++;
+    beep(700,0.1); setTimeout(()=>beep(900,0.14),100);
+  } else {
+    btn.classList.add('wrong');
+    buttons[q.correct].classList.add('correct');
+    feedback.textContent = q.no;
+    feedback.className = 'quiz-feedback wrong';
+    beep(220,0.18,'sawtooth',0.05);
+  }
+  updateQuizScore();
+}
+function updateQuizScore() {
+  const answeredCount = Object.keys(quizAnswered).length;
+  const scoreEl = document.getElementById('quiz-score');
+  if (answeredCount === 0) { scoreEl.textContent = ''; return; }
+  scoreEl.textContent = `نتيجتك: ${quizScore} من ${answeredCount}${answeredCount === QUIZ.length ? (quizScore === QUIZ.length ? ' — ممتاز! 🏆' : ' — حاول تاني عشان تحسّن نتيجتك 💪') : ''}`;
+}
+function resetQuiz() {
+  quizScore = 0;
+  quizAnswered = {};
+  document.getElementById('quiz-score').textContent = '';
+  document.getElementById('q1-feedback').textContent = '';
+  document.getElementById('q2-feedback').textContent = '';
+  buildQuiz();
+}
+
+// ── init ─────────────────────────────────────────────────────────
+buildNodes();
+resize();
+buildQuiz();
+</script>
+</body>
+</html>
